@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var wakeUp = Date()
+    @State private var wakeUp = defaultWakeTime
 	@State private var sleepAmount = 8.0
 	@State private var coffeAmount = 1
 	
@@ -20,11 +20,14 @@ struct ContentView: View {
 		NavigationView{
 			
 			VStack{
-				Spacer()
+				Form{
 			Text("When do you what to wake up?").font(.headline)
 			
-				DatePicker("Please select a time", selection: $wakeUp, displayedComponents: .hourAndMinute).labelsHidden()
-				Spacer()
+				DatePicker("Please select a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+					.labelsHidden()
+					.datePickerStyle(WheelDatePickerStyle())
+				}
+				Form{
 				Text("Desired Amount of Sleep")
 					.font(.headline)
 				HStack{
@@ -32,7 +35,8 @@ struct ContentView: View {
 					Text("\(sleepAmount, specifier: "%g") hours")
 				}.frame(width: 200, height: 5, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
 				}
-				Spacer()
+				}
+				Form{
 				Text("Daily coffe intake")
 					.font(.headline)
 				HStack{
@@ -43,22 +47,31 @@ struct ContentView: View {
 							Text("\(coffeAmount ) cups")}
 					}.frame(width: 200, height: 5, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
 				}
-		Spacer()
+	
 			}.navigationBarTitle("BetterRest")
 				.navigationBarItems(trailing:
 										Button(action: calculateBedTime) {
 											Text("Calculate")
 										}
 				)
-			
+			}
 		}
 		
         
 		.alert(isPresented: $showingAlert, content: {
 			Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
 		})
+		
+		
         
     }
+	
+	static var defaultWakeTime: Date {
+		var components = DateComponents()
+		components.hour = 6
+		components.minute = 30
+		return Calendar.current.date(from: components) ?? Date()
+	}
 	func calculateBedTime(){
 		let model = SleepCalculator()
 		let components = Calendar.current.dateComponents([.hour,.minute], from: wakeUp)
